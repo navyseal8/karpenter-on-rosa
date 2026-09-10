@@ -1,0 +1,29 @@
+# ============================================================================
+# ClusterAutoscaler configuration for ROSA
+# ============================================================================
+# On ROSA, the ClusterAutoscaler is managed by the platform.
+# Use the `rosa` CLI to configure it — do NOT edit this CR directly via `oc`.
+#
+#   rosa edit autoscaler -c <CLUSTER_ID> \
+#     --balance-similar-node-groups \
+#     --skip-nodes-with-local-storage=false \
+#     --max-pod-grace-period 300 \
+#     --max-node-provision-time 15m \
+#     --max-nodes-total 24
+#
+# This YAML is provided for reference only — it shows the resulting CR.
+# ============================================================================
+apiVersion: autoscaling.openshift.io/v1
+kind: ClusterAutoscaler
+metadata:
+  name: default
+spec:
+  balanceSimilarNodeGroups: true
+  skipNodesWithLocalStorage: false
+  podPriorityThreshold: -10
+  maxPodGracePeriod: 300
+  resourceLimits:
+    maxNodesTotal: 24
+  scaleDown:
+    enabled: true
+    unneededTime: 5m

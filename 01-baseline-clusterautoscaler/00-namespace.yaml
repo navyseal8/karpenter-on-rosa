@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scaling-poc
+  labels:
+    purpose: scaling-poc
+    demo: cluster-autoscaler-baseline

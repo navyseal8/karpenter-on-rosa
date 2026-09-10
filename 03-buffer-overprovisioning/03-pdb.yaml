@@ -1,0 +1,18 @@
+# ============================================================================
+# PodDisruptionBudget — ensures at least 1 pod stays Running during
+# voluntary disruptions (node drain, cluster upgrade, Karpenter consolidation)
+# ============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: burst-workload-preempt-pdb
+  namespace: scaling-poc
+  labels:
+    app.kubernetes.io/name: burst-workload
+    app.kubernetes.io/instance: buffer-preempt
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: burst-workload
+      app.kubernetes.io/instance: buffer-preempt

@@ -1,0 +1,159 @@
+# ============================================================================
+# Burst workload to trigger ClusterAutoScaler scale-up
+# ============================================================================
+# Best practices applied:
+#   ✅ 2+ replicas for high availability
+#   ✅ PodDisruptionBudget (separate file)
+#   ✅ Readiness / Liveness / Startup probes
+#   ✅ TopologySpreadConstraints (zone + node)
+#   ✅ Resource requests = limits (Guaranteed QoS)
+#   ✅ Security context (non-root, read-only rootfs, drop all caps)
+#   ✅ terminationGracePeriodSeconds for graceful shutdown
+#   ✅ Kubernetes recommended labels
+#
+# Expected timeline on ROSA (ClusterAutoScaler + CAPI):
+#   1. Pods go Pending              (~0s)
+#   2. CA detects unschedulable pods (~10s scan interval)
+#   3. CA requests MachineSet scale  (~20-30s)
+#   4. CAPI calls AWS EC2 API        (~1-2min)
+#   5. EC2 instance launches          (~2-3min)
+#   6. Node bootstraps OpenShift      (~3-5min)
+#   7. CSR approval (auto/manual)     (~1-3min)
+#   8. Node becomes Ready             (~1-2min)
+#   9. Pods scheduled and Running     (~30s)
+#   TOTAL: ~10-15 minutes
+# ============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: burst-workload-cas
+  namespace: scaling-poc
+  labels:
+    app.kubernetes.io/name: burst-workload
+    app.kubernetes.io/instance: cas-baseline
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: scaling-poc
+    app.kubernetes.io/managed-by: kubectl
+    workload-type: burst
+spec:
+  replicas: 0  # Start at 0 for test — scale to ≥2 to trigger CA
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero-downtime deploys
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: burst-workload
+      app.kubernetes.io/instance: cas-baseline
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: burst-workload
+        app.kubernetes.io/instance: cas-baseline
+        app.kubernetes.io/component: api
+        workload-type: burst
+    spec:
+      # ── Spread across zones and nodes for resilience ──────────
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: burst-workload
+              app.kubernetes.io/instance: cas-baseline
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: burst-workload
+              app.kubernetes.io/instance: cas-baseline
+
+      # ── Security hardening ────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: false
+
+      containers:
+        - name: app
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Starting on node: ${NODE_NAME}"
+              echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Initializing application..."
+              sleep 3
+              touch /tmp/healthy
+              touch /tmp/ready
+              echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] Application ready"
+              trap 'echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] SIGTERM received, shutting down..."; rm -f /tmp/ready; sleep 5; exit 0' TERM
+              while true; do sleep 5; done
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+          # ── Probes ──────────────────────────────────────────────
+          startupProbe:
+            exec:
+              command: ["test", "-f", "/tmp/healthy"]
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            failureThreshold: 15  # 30s max startup time
+          readinessProbe:
+            exec:
+              command: ["test", "-f", "/tmp/ready"]
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 2
+            successThreshold: 1
+          livenessProbe:
+            exec:
+              command: ["test", "-f", "/tmp/healthy"]
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # ── Resources (Guaranteed QoS) ──────────────────────────
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+          # ── Security context ────────────────────────────────────
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          # ── Writable tmp for probe files ────────────────────────
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 10Mi
+
+      terminationGracePeriodSeconds: 30

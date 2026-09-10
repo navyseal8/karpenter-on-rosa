@@ -1,0 +1,90 @@
+# ============================================================================
+# Karpenter NodePool + OpenshiftEC2NodeClass for ROSA HCP
+# ============================================================================
+# This NodePool is targeted by bursty workloads using the label:
+#   workload-type: burst
+#
+# Karpenter right-sizes the instance by evaluating pending pod resource
+# requests and selecting the optimal EC2 instance type from the allowed
+# families (c, m, r) — no static instance type pre-selection needed.
+#
+# ROSA manages OpenshiftEC2NodeClass automatically (subnets, SGs, AMI).
+# ============================================================================
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: burst-nodepool
+spec:
+  weight: 100  # Higher weight = preferred over default pool
+  template:
+    metadata:
+      labels:
+        autonode: "true"
+        workload-type: burst
+        nodepool: burst
+    spec:
+      requirements:
+        # Allow flexible instance families for right-sizing
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m", "r"]
+        # Restrict to current-gen instances
+        - key: karpenter.k8s.aws/instance-generation
+          operator: Gt
+          values: ["5"]
+        # x86_64 architecture
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        # On-demand for predictable POC (switch to Spot for cost savings)
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        # Instance size range for right-sizing
+        - key: karpenter.k8s.aws/instance-cpu
+          operator: In
+          values: ["4", "8", "16"]
+      # Reference ROSA-managed node class
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      # Taints to ensure only labelled workloads land here
+      taints:
+        - key: workload-type
+          value: burst
+          effect: NoSchedule
+  # Resource limits for this pool
+  limits:
+    cpu: "96"
+    memory: "384Gi"
+  # Consolidation: aggressively reclaim unused capacity
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 30s
+---
+# ============================================================================
+# OpenshiftEC2NodeClass — ROSA manages this automatically
+# ============================================================================
+# On ROSA HCP, the default OpenshiftEC2NodeClass is created when AutoNode
+# is enabled. Subnet and security group selectors are auto-configured
+# via karpenter.sh/discovery tags.
+#
+# This YAML is for reference. Only apply if you need custom AMI/userData.
+# ============================================================================
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # ROSA auto-discovers subnets and security groups via tags
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  # ROSA manages the AMI — no manual AMI selection needed
+  amiSelectorTerms:
+    - alias: al2023@latest
+  role: "KarpenterNodeRole-${CLUSTER_NAME}"

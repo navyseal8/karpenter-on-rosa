@@ -1,0 +1,45 @@
+# ============================================================================
+# PriorityClasses for buffer pod overprovisioning
+# ============================================================================
+# Strategy:
+#   1. Buffer/placeholder pods run at NEGATIVE priority (-1000)
+#   2. Real production workloads run at HIGH priority (1000000)
+#   3. When real pods arrive and capacity is tight, the scheduler
+#      PREEMPTS (evicts) buffer pods instantly to free up resources
+#   4. Buffer pods return to Pending → Karpenter provisions replacement
+#      nodes → buffer refills automatically
+#
+# Result: Real workloads start in SECONDS on pre-warmed capacity,
+#         instead of waiting 10-15min for new nodes.
+# ============================================================================
+
+# Low-priority class for buffer/placeholder pods
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: buffer-placeholder
+  labels:
+    purpose: overprovisioning
+value: -1000
+globalDefault: false
+preemptionPolicy: Never  # Buffer pods should never preempt anything else
+description: >-
+  Negative-priority class for buffer/placeholder pods.
+  These pods reserve cluster capacity and get preempted when real
+  workloads need the resources.
+
+---
+# High-priority class for real production/burst workloads
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: production-burst
+  labels:
+    purpose: production
+value: 1000000
+globalDefault: false
+preemptionPolicy: PreemptLowerPriority
+description: >-
+  High-priority class for real production and burst workloads.
+  These pods will preempt buffer/placeholder pods to claim
+  pre-provisioned capacity instantly.

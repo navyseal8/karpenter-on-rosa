@@ -1,0 +1,109 @@
+# ============================================================================
+# Buffer (Overprovisioning) Pods
+# ============================================================================
+# These placeholder pods run with the `buffer-placeholder` PriorityClass
+# (-1000 priority). They consume resources to keep warm capacity available.
+#
+# When real workloads arrive with `production-burst` PriorityClass,
+# the scheduler preempts these buffer pods instantly, giving the real
+# workloads immediate access to pre-provisioned node capacity.
+#
+# The evicted buffer pods go back to Pending. Karpenter (or CA) then
+# provisions new nodes to satisfy them, refilling the buffer automatically.
+#
+# Sizing guidance:
+#   - Match buffer pod resource requests to your expected burst workload size
+#   - Each replica reserves capacity for ~1 burst pod
+#   - 5 replicas = 5 burst pods can start instantly without waiting for nodes
+#   - TopologySpreadConstraints spread buffers across zones + nodes
+#
+# Note: Buffer pods intentionally have NO PDB — they must be freely
+#       evictable by the scheduler during preemption. A PDB on buffer
+#       pods would block real workloads from claiming the warm capacity.
+# ============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capacity-buffer
+  namespace: scaling-poc
+  labels:
+    app.kubernetes.io/name: capacity-placeholder
+    app.kubernetes.io/component: overprovisioning
+    app.kubernetes.io/part-of: scaling-poc
+    app.kubernetes.io/managed-by: kubectl
+    purpose: buffer
+spec:
+  replicas: 5  # Number of warm slots to maintain
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1  # Buffer pods are expendable — can tolerate unavailability
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: capacity-placeholder
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: capacity-placeholder
+        app.kubernetes.io/component: overprovisioning
+      annotations:
+        kubernetes.io/description: "Capacity reservation placeholder — preemptable buffer"
+    spec:
+      # Negative priority — gets preempted by real workloads
+      priorityClassName: buffer-placeholder
+
+      # ── Target Karpenter burst NodePool ───────────────────────
+      nodeSelector:
+        workload-type: burst
+      tolerations:
+        - key: workload-type
+          value: burst
+          operator: Equal
+          effect: NoSchedule
+
+      # ── Spread across zones and nodes ─────────────────────────
+      # Each buffer pod warms a different node for maximum coverage
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: capacity-placeholder
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: capacity-placeholder
+
+      # ── Security hardening ────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534  # nobody
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: false
+
+      containers:
+        - name: pause
+          # Minimal pause container — uses negligible CPU
+          image: registry.k8s.io/pause:3.10
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+      terminationGracePeriodSeconds: 0  # Evict instantly — no graceful shutdown needed
