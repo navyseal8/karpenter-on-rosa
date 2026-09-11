@@ -42,38 +42,18 @@ Pre-provisions warm capacity using **placeholder pods with negative PriorityClas
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        ROSA HCP Cluster                            │
-│                                                                     │
-│  ┌──────────────────┐   ┌──────────────────┐   ┌────────────────┐  │
-│  │ ClusterAutoScaler │   │ Karpenter        │   │ Scheduler      │  │
-│  │ (CA + CAPI)       │   │ (AutoNode)       │   │ (Preemption)   │  │
-│  │                   │   │                  │   │                │  │
-│  │ Pending Pod       │   │ Pending Pod      │   │ High-priority  │  │
-│  │    ↓              │   │    ↓             │   │ pod arrives    │  │
-│  │ Scale MachineSet  │   │ CreateFleet API  │   │    ↓           │  │
-│  │    ↓              │   │    ↓             │   │ Preempts       │  │
-│  │ CAPI → EC2        │   │ EC2 direct       │   │ buffer pod     │  │
-│  │    ↓              │   │    ↓             │   │    ↓           │  │
-│  │ Bootstrap + CSR   │   │ Fast bootstrap   │   │ Instant start  │  │
-│  │    ↓              │   │    ↓             │   │                │  │
-│  │ ⏱️  10-15 min      │   │ ⏱️  2-3 min       │   │ ⏱️  5-15 sec    │  │
-│  └──────────────────┘   └──────────────────┘   └────────────────┘  │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ Worker Nodes                                                │   │
-│  │                                                             │   │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │   │
-│  │  │ Node 1  │  │ Node 2  │  │ Node 3  │  │ Node 4  │       │   │
-│  │  │ (base)  │  │ (base)  │  │ (burst) │  │ (burst) │       │   │
-│  │  │         │  │         │  │ buffer  │  │ buffer  │       │   │
-│  │  │ system  │  │ system  │  │ pods ↔  │  │ pods ↔  │       │   │
-│  │  │ pods    │  │ pods    │  │ real    │  │ real    │       │   │
-│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘       │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-```
+> 📐 Open [`architecture.drawio`](architecture.drawio) in [draw.io](https://app.diagrams.net/) or the VS Code draw.io extension for the full interactive diagram.
+
+![Architecture Diagram — open architecture.drawio for interactive version](architecture.drawio)
+
+The diagram shows:
+
+| Section | What it illustrates |
+|---------|---------------------|
+| **Top left (red)** | ClusterAutoScaler flow — 8-step pipeline through CAPI, EC2, bootstrap, CSR → 10-15 min |
+| **Top centre (amber)** | Karpenter AutoNode flow — direct CreateFleet API, fast bootstrap → 2-3 min |
+| **Top right (green)** | Buffer overprovisioning — preemption of low-priority pause pods → 10-20 sec |
+| **Bottom** | Worker nodes split across 2 AZs, showing topology spread, buffer ↔ real pod preemption, PDB/probes |
 
 ## Prerequisites
 
@@ -208,6 +188,7 @@ oc get pdb -n scaling-poc
 ```
 .
 ├── README.md                                  # This file
+├── architecture.drawio                        # Architecture diagram (draw.io)
 ├── 01-baseline-clusterautoscaler/
 │   ├── 00-namespace.yaml                      # Shared namespace
 │   ├── 01-clusterautoscaler.yaml              # CA config (reference only)
