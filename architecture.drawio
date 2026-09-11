@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Cursor" version="26.0">
   <diagram id="rosa-scaling-poc" name="ROSA Scaling POC Architecture">
-    <mxGraphModel dx="1420" dy="860" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -9,53 +9,53 @@
         <!-- Title                                                  -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="title" value="ROSA Scaling POC — ClusterAutoScaler vs Karpenter AutoNode vs Buffer Overprovisioning" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
-          <mxGeometry x="200" y="20" width="1200" height="40" as="geometry" />
+          <mxGeometry x="200" y="30" width="1200" height="40" as="geometry" />
         </mxCell>
 
         <!-- ══════════════════════════════════════════════════════ -->
         <!-- ROSA HCP Cluster boundary                              -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="cluster" value="ROSA HCP Cluster (OpenShift ≥ 4.22)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#CC0000;strokeWidth=3;dashed=0;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingLeft=15;spacingTop=8;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="40" y="80" width="1520" height="880" as="geometry" />
+          <mxGeometry x="40" y="90" width="1520" height="880" as="geometry" />
         </mxCell>
 
         <!-- ══════════════════════════════════════════════════════ -->
         <!-- APPROACH 1: ClusterAutoScaler (CA + CAPI)              -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="ca_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE6E6;strokeColor=#CC0000;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="80" y="140" width="420" height="440" as="geometry" />
+          <mxGeometry x="80" y="150" width="420" height="440" as="geometry" />
         </mxCell>
         <mxCell id="ca_title" value="❌ Approach 1: ClusterAutoScaler" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=#CC0000;fontColor=#FFFFFF;rounded=1;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="110" y="150" width="360" height="36" as="geometry" />
+          <mxGeometry x="110" y="160" width="360" height="36" as="geometry" />
         </mxCell>
         <mxCell id="ca_time" value="⏱️ 10 – 15 min" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#CC0000;" vertex="1" parent="1">
-          <mxGeometry x="160" y="540" width="240" height="30" as="geometry" />
+          <mxGeometry x="160" y="550" width="240" height="30" as="geometry" />
         </mxCell>
 
         <!-- CA flow steps -->
         <mxCell id="ca_s1" value="Pods go Pending" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="200" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="210" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s2" value="CA detects unschedulable (~10s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="244" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="254" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s3" value="Scale MachineSet via CAPI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="288" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="298" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s4" value="CAPI → AWS EC2 API (~1-2 min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="332" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="342" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s5" value="EC2 instance launches (~2-3 min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="376" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="386" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s6" value="Node bootstrap + CSR (~3-5 min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="420" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="430" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s7" value="Node Ready → Pod scheduled" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="464" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="474" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="ca_s8" value="Readiness probe passes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CC0000;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="180" y="508" width="200" height="32" as="geometry" />
+          <mxGeometry x="180" y="518" width="200" height="32" as="geometry" />
         </mxCell>
 
         <!-- CA flow arrows -->
@@ -71,36 +71,36 @@
         <!-- APPROACH 2: Karpenter AutoNode                         -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="kp_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="560" y="140" width="420" height="440" as="geometry" />
+          <mxGeometry x="560" y="150" width="420" height="440" as="geometry" />
         </mxCell>
         <mxCell id="kp_title" value="⚡ Approach 2: Karpenter AutoNode" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=#F9A825;fontColor=#FFFFFF;rounded=1;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="590" y="150" width="360" height="36" as="geometry" />
+          <mxGeometry x="590" y="160" width="360" height="36" as="geometry" />
         </mxCell>
         <mxCell id="kp_time" value="⏱️ 2 – 3 min" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#F9A825;" vertex="1" parent="1">
-          <mxGeometry x="650" y="540" width="220" height="30" as="geometry" />
+          <mxGeometry x="650" y="550" width="220" height="30" as="geometry" />
         </mxCell>
         <mxCell id="kp_badge" value="~5x faster" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fontColor=#FFFFFF;fillColor=#F9A825;rounded=1;arcSize=40;" vertex="1" parent="1">
-          <mxGeometry x="870" y="540" width="90" height="26" as="geometry" />
+          <mxGeometry x="870" y="550" width="90" height="26" as="geometry" />
         </mxCell>
 
         <!-- KP flow steps -->
         <mxCell id="kp_s1" value="Pods go Pending" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="660" y="200" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="210" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="kp_s2" value="Karpenter detects (~1-2s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="660" y="256" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="266" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="kp_s3" value="CreateFleet API → right-sized EC2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="660" y="312" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="322" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="kp_s4" value="EC2 launches (~30-60s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="660" y="368" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="378" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="kp_s5" value="Fast bootstrap + Ready (~60-90s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="660" y="424" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="434" width="200" height="32" as="geometry" />
         </mxCell>
         <mxCell id="kp_s6" value="Readiness probe passes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="660" y="480" width="200" height="32" as="geometry" />
+          <mxGeometry x="660" y="490" width="200" height="32" as="geometry" />
         </mxCell>
 
         <!-- KP flow arrows -->
@@ -114,38 +114,38 @@
         <!-- APPROACH 3: Buffer Overprovisioning + Preemption       -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="buf_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="1040" y="140" width="480" height="440" as="geometry" />
+          <mxGeometry x="1040" y="150" width="480" height="440" as="geometry" />
         </mxCell>
         <mxCell id="buf_title" value="✅ Approach 3: Buffer Overprovisioning" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=#2E7D32;fontColor=#FFFFFF;rounded=1;arcSize=20;" vertex="1" parent="1">
-          <mxGeometry x="1070" y="150" width="420" height="36" as="geometry" />
+          <mxGeometry x="1070" y="160" width="420" height="36" as="geometry" />
         </mxCell>
         <mxCell id="buf_time" value="⏱️ 10 – 20 sec" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fontColor=#2E7D32;" vertex="1" parent="1">
-          <mxGeometry x="1130" y="540" width="220" height="30" as="geometry" />
+          <mxGeometry x="1130" y="550" width="220" height="30" as="geometry" />
         </mxCell>
         <mxCell id="buf_badge" value="~50x faster" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fontColor=#FFFFFF;fillColor=#2E7D32;rounded=1;arcSize=40;" vertex="1" parent="1">
-          <mxGeometry x="1360" y="540" width="100" height="26" as="geometry" />
+          <mxGeometry x="1360" y="550" width="100" height="26" as="geometry" />
         </mxCell>
 
         <!-- Buffer flow steps -->
         <mxCell id="buf_s1" value="Real pods go Pending&lt;br&gt;&lt;i&gt;priorityClass: production-burst (1M)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="200" width="280" height="40" as="geometry" />
+          <mxGeometry x="1120" y="210" width="280" height="40" as="geometry" />
         </mxCell>
         <mxCell id="buf_s2" value="Scheduler preempts buffer pods&lt;br&gt;&lt;i&gt;priorityClass: buffer-placeholder (-1000)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="260" width="280" height="40" as="geometry" />
+          <mxGeometry x="1120" y="270" width="280" height="40" as="geometry" />
         </mxCell>
         <mxCell id="buf_s3" value="Buffer pods evicted instantly&lt;br&gt;&lt;i&gt;terminationGracePeriodSeconds: 0&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="320" width="280" height="40" as="geometry" />
+          <mxGeometry x="1120" y="330" width="280" height="40" as="geometry" />
         </mxCell>
         <mxCell id="buf_s4" value="Real pods scheduled on warm capacity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="380" width="280" height="32" as="geometry" />
+          <mxGeometry x="1120" y="390" width="280" height="32" as="geometry" />
         </mxCell>
         <mxCell id="buf_s5" value="Startup + readiness probe passes (~5-10s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="432" width="280" height="32" as="geometry" />
+          <mxGeometry x="1120" y="442" width="280" height="32" as="geometry" />
         </mxCell>
 
         <!-- Buffer refill (background) -->
         <mxCell id="buf_refill" value="⟳ Background: buffer pods go Pending → Karpenter refills in ~2-3 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;strokeDashArray=4;fontSize=10;fontStyle=2;" vertex="1" parent="1">
-          <mxGeometry x="1120" y="484" width="280" height="32" as="geometry" />
+          <mxGeometry x="1120" y="494" width="280" height="32" as="geometry" />
         </mxCell>
 
         <!-- Buffer flow arrows -->
@@ -159,137 +159,137 @@
         <!-- Worker Nodes (bottom section)                          -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="nodes_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#616161;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="80" y="610" width="1480" height="320" as="geometry" />
+          <mxGeometry x="80" y="620" width="1480" height="320" as="geometry" />
         </mxCell>
         <mxCell id="nodes_title" value="Worker Nodes" style="text;html=1;fontSize=15;fontStyle=1;align=left;verticalAlign=middle;spacingLeft=10;" vertex="1" parent="1">
-          <mxGeometry x="90" y="615" width="200" height="30" as="geometry" />
+          <mxGeometry x="90" y="625" width="200" height="30" as="geometry" />
         </mxCell>
 
         <!-- Zone A -->
         <mxCell id="zone_a" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#9E9E9E;strokeWidth=1;strokeDashArray=4;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="110" y="660" width="680" height="240" as="geometry" />
+          <mxGeometry x="110" y="670" width="680" height="240" as="geometry" />
         </mxCell>
         <mxCell id="zone_a_label" value="Availability Zone A" style="text;html=1;fontSize=12;fontStyle=3;align=left;verticalAlign=top;fontColor=#757575;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="110" y="660" width="200" height="24" as="geometry" />
+          <mxGeometry x="110" y="670" width="200" height="24" as="geometry" />
         </mxCell>
 
         <!-- Zone B -->
         <mxCell id="zone_b" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#9E9E9E;strokeWidth=1;strokeDashArray=4;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="830" y="660" width="700" height="240" as="geometry" />
+          <mxGeometry x="830" y="670" width="700" height="240" as="geometry" />
         </mxCell>
         <mxCell id="zone_b_label" value="Availability Zone B" style="text;html=1;fontSize=12;fontStyle=3;align=left;verticalAlign=top;fontColor=#757575;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="830" y="660" width="200" height="24" as="geometry" />
+          <mxGeometry x="830" y="670" width="200" height="24" as="geometry" />
         </mxCell>
 
-        <!-- Node 1 (base - Zone A) -->
+        <!-- Node 1 (base — Zone A) -->
         <mxCell id="node1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#616161;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="140" y="700" width="300" height="180" as="geometry" />
+          <mxGeometry x="140" y="710" width="300" height="180" as="geometry" />
         </mxCell>
         <mxCell id="node1_title" value="Node 1 (MachinePool — base)" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fillColor=#616161;fontColor=#FFFFFF;rounded=1;arcSize=14;" vertex="1" parent="1">
-          <mxGeometry x="155" y="708" width="270" height="26" as="geometry" />
+          <mxGeometry x="155" y="718" width="270" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node1_p1" value="system pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="160" y="744" width="110" height="26" as="geometry" />
+          <mxGeometry x="160" y="754" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node1_p2" value="system pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="160" y="778" width="110" height="26" as="geometry" />
+          <mxGeometry x="160" y="788" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node1_p3" value="ingress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="160" y="812" width="110" height="26" as="geometry" />
+          <mxGeometry x="160" y="822" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node1_p4" value="monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="160" y="846" width="110" height="26" as="geometry" />
+          <mxGeometry x="160" y="856" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node1_bp" value="burst pod&lt;br&gt;(app replica 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="290" y="744" width="130" height="40" as="geometry" />
+          <mxGeometry x="290" y="754" width="130" height="40" as="geometry" />
         </mxCell>
         <mxCell id="node1_res" value="✅ PDB&lt;br&gt;✅ Probes&lt;br&gt;✅ TopologySpread" style="text;html=1;fontSize=9;align=left;verticalAlign=top;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
-          <mxGeometry x="290" y="794" width="130" height="50" as="geometry" />
+          <mxGeometry x="290" y="804" width="130" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Node 2 (burst - Zone A - Karpenter) -->
+        <!-- Node 2 (burst — Zone A — Karpenter) -->
         <mxCell id="node2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="470" y="700" width="300" height="180" as="geometry" />
+          <mxGeometry x="470" y="710" width="300" height="180" as="geometry" />
         </mxCell>
         <mxCell id="node2_title" value="Node 2 (Karpenter — burst)" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fillColor=#F9A825;fontColor=#FFFFFF;rounded=1;arcSize=14;" vertex="1" parent="1">
-          <mxGeometry x="485" y="708" width="270" height="26" as="geometry" />
+          <mxGeometry x="485" y="718" width="270" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node2_label" value="workload-type: burst" style="text;html=1;fontSize=9;fontStyle=2;align=center;verticalAlign=middle;fontColor=#F9A825;" vertex="1" parent="1">
-          <mxGeometry x="485" y="736" width="270" height="16" as="geometry" />
+          <mxGeometry x="485" y="746" width="270" height="16" as="geometry" />
         </mxCell>
         <mxCell id="node2_buf1" value="🟢 buffer pod&lt;br&gt;&lt;i&gt;pause (priority -1000)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=10;strokeDashArray=4;" vertex="1" parent="1">
-          <mxGeometry x="490" y="758" width="120" height="50" as="geometry" />
+          <mxGeometry x="490" y="768" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node2_buf2" value="🟢 buffer pod&lt;br&gt;&lt;i&gt;pause (priority -1000)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=10;strokeDashArray=4;" vertex="1" parent="1">
-          <mxGeometry x="625" y="758" width="120" height="50" as="geometry" />
+          <mxGeometry x="625" y="768" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node2_preempt" value="↕ preemption" style="text;html=1;fontSize=10;fontStyle=1;align=center;verticalAlign=middle;fontColor=#CC0000;" vertex="1" parent="1">
-          <mxGeometry x="490" y="812" width="255" height="16" as="geometry" />
+          <mxGeometry x="490" y="822" width="255" height="16" as="geometry" />
         </mxCell>
         <mxCell id="node2_real1" value="🔵 burst pod&lt;br&gt;&lt;i&gt;real (priority 1M)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="490" y="832" width="120" height="50" as="geometry" />
+          <mxGeometry x="490" y="842" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node2_real2" value="🔵 burst pod&lt;br&gt;&lt;i&gt;real (priority 1M)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="625" y="832" width="120" height="50" as="geometry" />
+          <mxGeometry x="625" y="842" width="120" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Node 3 (burst - Zone B - Karpenter) -->
+        <!-- Node 3 (burst — Zone B — Karpenter) -->
         <mxCell id="node3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F9A825;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="860" y="700" width="300" height="180" as="geometry" />
+          <mxGeometry x="860" y="710" width="300" height="180" as="geometry" />
         </mxCell>
         <mxCell id="node3_title" value="Node 3 (Karpenter — burst)" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fillColor=#F9A825;fontColor=#FFFFFF;rounded=1;arcSize=14;" vertex="1" parent="1">
-          <mxGeometry x="875" y="708" width="270" height="26" as="geometry" />
+          <mxGeometry x="875" y="718" width="270" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node3_label" value="workload-type: burst" style="text;html=1;fontSize=9;fontStyle=2;align=center;verticalAlign=middle;fontColor=#F9A825;" vertex="1" parent="1">
-          <mxGeometry x="875" y="736" width="270" height="16" as="geometry" />
+          <mxGeometry x="875" y="746" width="270" height="16" as="geometry" />
         </mxCell>
         <mxCell id="node3_buf1" value="🟢 buffer pod&lt;br&gt;&lt;i&gt;pause (priority -1000)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=10;strokeDashArray=4;" vertex="1" parent="1">
-          <mxGeometry x="880" y="758" width="120" height="50" as="geometry" />
+          <mxGeometry x="880" y="768" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node3_buf2" value="🟢 buffer pod&lt;br&gt;&lt;i&gt;pause (priority -1000)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=10;strokeDashArray=4;" vertex="1" parent="1">
-          <mxGeometry x="1015" y="758" width="120" height="50" as="geometry" />
+          <mxGeometry x="1015" y="768" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node3_preempt" value="↕ preemption" style="text;html=1;fontSize=10;fontStyle=1;align=center;verticalAlign=middle;fontColor=#CC0000;" vertex="1" parent="1">
-          <mxGeometry x="880" y="812" width="255" height="16" as="geometry" />
+          <mxGeometry x="880" y="822" width="255" height="16" as="geometry" />
         </mxCell>
         <mxCell id="node3_real1" value="🔵 burst pod&lt;br&gt;&lt;i&gt;real (priority 1M)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="880" y="832" width="120" height="50" as="geometry" />
+          <mxGeometry x="880" y="842" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="node3_real2" value="🔵 burst pod&lt;br&gt;&lt;i&gt;real (priority 1M)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1015" y="832" width="120" height="50" as="geometry" />
+          <mxGeometry x="1015" y="842" width="120" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Node 4 (base - Zone B) -->
+        <!-- Node 4 (base — Zone B) -->
         <mxCell id="node4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#616161;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
-          <mxGeometry x="1200" y="700" width="300" height="180" as="geometry" />
+          <mxGeometry x="1200" y="710" width="300" height="180" as="geometry" />
         </mxCell>
         <mxCell id="node4_title" value="Node 4 (MachinePool — base)" style="text;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fillColor=#616161;fontColor=#FFFFFF;rounded=1;arcSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1215" y="708" width="270" height="26" as="geometry" />
+          <mxGeometry x="1215" y="718" width="270" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node4_p1" value="system pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1220" y="744" width="110" height="26" as="geometry" />
+          <mxGeometry x="1220" y="754" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node4_p2" value="system pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1220" y="778" width="110" height="26" as="geometry" />
+          <mxGeometry x="1220" y="788" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node4_p3" value="registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1220" y="812" width="110" height="26" as="geometry" />
+          <mxGeometry x="1220" y="822" width="110" height="26" as="geometry" />
         </mxCell>
         <mxCell id="node4_bp" value="burst pod&lt;br&gt;(app replica 2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1350" y="744" width="130" height="40" as="geometry" />
+          <mxGeometry x="1350" y="754" width="130" height="40" as="geometry" />
         </mxCell>
         <mxCell id="node4_res" value="✅ PDB&lt;br&gt;✅ Probes&lt;br&gt;✅ TopologySpread" style="text;html=1;fontSize=9;align=left;verticalAlign=top;fontColor=#1565C0;fontStyle=2;" vertex="1" parent="1">
-          <mxGeometry x="1350" y="794" width="130" height="50" as="geometry" />
+          <mxGeometry x="1350" y="804" width="130" height="50" as="geometry" />
         </mxCell>
 
         <!-- ══════════════════════════════════════════════════════ -->
         <!-- Legend                                                 -->
         <!-- ══════════════════════════════════════════════════════ -->
         <mxCell id="legend_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BDBDBD;strokeWidth=1;arcSize=8;" vertex="1" parent="1">
-          <mxGeometry x="80" y="940" width="1480" height="16" as="geometry" />
+          <mxGeometry x="80" y="950" width="1480" height="16" as="geometry" />
         </mxCell>
         <mxCell id="legend" value="Legend: &amp;nbsp; 🔴 CA + CAPI (slow) &amp;nbsp;│&amp;nbsp; 🟡 Karpenter AutoNode (fast) &amp;nbsp;│&amp;nbsp; 🟢 Buffer pods (preemptable) &amp;nbsp;│&amp;nbsp; 🔵 Real burst pods (high priority) &amp;nbsp;│&amp;nbsp; ⬜ System pods &amp;nbsp;│&amp;nbsp; ⎕ TopologySpreadConstraints spread pods across zones + nodes" style="text;html=1;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="1">
-          <mxGeometry x="80" y="938" width="1480" height="20" as="geometry" />
+          <mxGeometry x="80" y="948" width="1480" height="20" as="geometry" />
         </mxCell>
 
       </root>
