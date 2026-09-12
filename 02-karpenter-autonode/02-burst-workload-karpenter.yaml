@@ -135,18 +135,19 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
 
-          # ── Resources (Guaranteed QoS) ──────────────────────────
+          # ── Resources — same size as CA test for fair comparison ──
+          # 1 pod per burst node (3.5 CPU allocatable, ~6.5Gi mem).
+          # 4 pods → Karpenter provisions 4 right-sized burst nodes
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
             limits:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
 
-          # ── Security context ────────────────────────────────────
+          # ── Security context (OpenShift restricted-v2 compatible) ──
           securityContext:
-            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

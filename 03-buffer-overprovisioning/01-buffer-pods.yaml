@@ -79,11 +79,9 @@ spec:
             matchLabels:
               app.kubernetes.io/name: capacity-placeholder
 
-      # ── Security hardening ────────────────────────────────────
+      # ── Security hardening (OpenShift restricted-v2 compatible) ──
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534  # nobody
-        runAsGroup: 65534
         seccompProfile:
           type: RuntimeDefault
       automountServiceAccountToken: false
@@ -92,15 +90,17 @@ spec:
         - name: pause
           # Minimal pause container — uses negligible CPU
           image: registry.k8s.io/pause:3.10
+          # ── Resources — match the real burst workload size ──────
+          # Each buffer pod reserves capacity for exactly 1 real pod
+          # 1 buffer per burst node (3.5 CPU alloc, ~6.5Gi mem)
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
             limits:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
           securityContext:
-            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

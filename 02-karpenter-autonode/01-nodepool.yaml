@@ -62,29 +62,19 @@ spec:
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
     consolidateAfter: 30s
----
 # ============================================================================
-# OpenshiftEC2NodeClass — ROSA manages this automatically
+# OpenshiftEC2NodeClass — DO NOT include here
 # ============================================================================
-# On ROSA HCP, the default OpenshiftEC2NodeClass is created when AutoNode
-# is enabled. Subnet and security group selectors are auto-configured
-# via karpenter.sh/discovery tags.
+# ROSA HCP automatically creates and manages the default OpenshiftEC2NodeClass
+# when AutoNode is enabled. It handles:
+#   - Subnet discovery    (via karpenter.sh/discovery tags)
+#   - Security groups     (via karpenter.sh/discovery tags)
+#   - AMI selection       (ROSA-managed, not user-configurable)
+#   - Instance profile    (ROSA-managed)
 #
-# This YAML is for reference. Only apply if you need custom AMI/userData.
+# Do NOT apply your own EC2NodeClass — it will conflict with the
+# ROSA-managed one and cause validation errors.
+#
+# To inspect the ROSA-managed node class:
+#   oc get openshiftec2nodeclass default -o yaml
 # ============================================================================
-apiVersion: karpenter.k8s.aws/v1
-kind: EC2NodeClass
-metadata:
-  name: default
-spec:
-  # ROSA auto-discovers subnets and security groups via tags
-  subnetSelectorTerms:
-    - tags:
-        karpenter.sh/discovery: "${CLUSTER_NAME}"
-  securityGroupSelectorTerms:
-    - tags:
-        karpenter.sh/discovery: "${CLUSTER_NAME}"
-  # ROSA manages the AMI — no manual AMI selection needed
-  amiSelectorTerms:
-    - alias: al2023@latest
-  role: "KarpenterNodeRole-${CLUSTER_NAME}"

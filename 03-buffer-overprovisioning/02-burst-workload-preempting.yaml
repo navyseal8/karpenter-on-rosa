@@ -144,18 +144,18 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
 
-          # ── Resources (Guaranteed QoS) ──────────────────────────
+          # ── Resources — must match buffer pod size for preemption ──
+          # Each real pod replaces exactly one buffer pod's capacity
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
             limits:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
 
-          # ── Security context ────────────────────────────────────
+          # ── Security context (OpenShift restricted-v2 compatible) ──
           securityContext:
-            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

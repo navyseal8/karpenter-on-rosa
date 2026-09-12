@@ -74,7 +74,7 @@ FIRST_RUNNING=""
 FIRST_READY=""
 ALL_READY=false
 POLL_INTERVAL=5
-MAX_WAIT=1200  # 20 minutes max
+MAX_WAIT=1500  # 25 minutes max (CA + CAPI can take 10-15 min)
 
 elapsed=0
 while [ "$elapsed" -lt "$MAX_WAIT" ]; do

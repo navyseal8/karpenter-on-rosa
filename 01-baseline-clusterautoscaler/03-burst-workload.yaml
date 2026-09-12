@@ -129,18 +129,21 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
 
-          # ── Resources (Guaranteed QoS) ──────────────────────────
+          # ── Resources — sized so only 1 pod fits per node ──────────
+          # Node allocatable = 3.5 CPU / ~14Gi. At 2 CPU per pod,
+          # at most 1 pod per base node. 4 pods across 3 base nodes
+          # → 3 fit, 1 goes Pending → CA must provision a new node
+          # via CAPI (the slow 10-15 min path we want to demonstrate)
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
             limits:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "2"
+              memory: "4Gi"
 
-          # ── Security context ────────────────────────────────────
+          # ── Security context (OpenShift restricted-v2 compatible) ──
           securityContext:
-            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
