@@ -42,9 +42,7 @@ Pre-provisions warm capacity using **placeholder pods with negative PriorityClas
 
 ## Architecture
 
-> 📐 Open [`architecture.drawio`](architecture.drawio) in [draw.io](https://app.diagrams.net/) or the VS Code draw.io extension for the full interactive diagram.
-
-![Architecture Diagram — open architecture.drawio for interactive version](architecture.drawio)
+![ROSA Scaling POC Architecture](architecture.png)
 
 The diagram shows:
 
@@ -356,7 +354,8 @@ oc delete nodepool burst-nodepool
 ```
 .
 ├── README.md                                  # This file
-├── architecture.drawio                        # Architecture diagram (draw.io)
+├── architecture.png                           # Architecture diagram
+├── architecture.drawio                        # Architecture diagram (editable, draw.io)
 ├── 01-baseline-clusterautoscaler/
 │   ├── 00-namespace.yaml                      # Shared namespace
 │   ├── 01-clusterautoscaler.yaml              # CA config (reference only)
