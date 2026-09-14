@@ -402,6 +402,43 @@ Buffer pods do **not** have a PDB. This is by design: they must be freely preemp
 so that real workloads can claim warm capacity instantly. A PDB would block the
 scheduler from evicting them during preemption, defeating the purpose.
 
+## Cross-Platform Comparison: Is This Problem Unique to ROSA?
+
+**No.** All managed Kubernetes services experience ClusterAutoScaler delays, but **ROSA/OpenShift is the slowest** because of extra abstraction layers.
+
+### ClusterAutoScaler Scale-Up Times by Platform
+
+| Platform | Typical CA Time | Root Cause |
+|----------|----------------|------------|
+| **ROSA / OpenShift** | **10–15 min** | CA → **CAPI** → EC2 → heavy node bootstrap → **CSR signing** |
+| **EKS** | **3–5 min** | CA → ASG → EC2 → lighter kubelet bootstrap |
+| **AKS** | **4–7 min** | CA → VMSS → Azure VM → kubelet bootstrap (Azure VMs can be slower to provision) |
+| **GKE** | **1.5–3 min** | Custom autoscaler (not stock CA) → GCE → fast bootstrap |
+
+### Why ROSA Is the Worst Case
+
+ROSA has **two extra layers** that EKS/AKS don't:
+
+1. **Cluster API (CAPI)** — CA doesn't talk to AWS directly. It scales a `MachineSet`, which triggers CAPI, which then calls EC2. That's an extra controller reconciliation loop adding ~1–2 min.
+2. **OpenShift CSR signing** — every new node must have its certificate signing request approved by the OpenShift control plane before it can join. This adds ~1–3 min that vanilla Kubernetes doesn't have.
+3. **Heavier node bootstrap** — OpenShift nodes run more system components (machine-config-daemon, CRI-O config, SDN/OVN setup) compared to a vanilla EKS/AKS kubelet start.
+
+### Faster Alternatives on Other Platforms
+
+| Platform | Fast Alternative | Time | Equivalent to |
+|----------|-----------------|------|---------------|
+| **EKS** | **Karpenter** (native — AWS built it) | ~1–2 min | Approach 2 (AutoNode) |
+| **EKS** | **EKS Auto Mode** (managed Karpenter) | ~1–2 min | Approach 2 |
+| **AKS** | **Node Auto Provisioning (NAP)** — uses Karpenter engine | ~2–3 min | Approach 2 |
+| **GKE** | **Node Auto Provisioning (NAP)** — built-in | ~1–2 min | Approach 2 |
+| **All platforms** | **Buffer pods + PriorityClass** (Approach 3) | ~10–20 sec | Platform-agnostic |
+
+### Portability of This POC
+
+- **Approach 1 (CA baseline)** — proves the problem on any platform; ROSA is where the pain is most visible
+- **Approach 2 (Karpenter)** — increasingly portable: originally AWS-only, now adopted by Azure (AKS NAP) and ROSA (AutoNode)
+- **Approach 3 (buffer overprovisioning)** — **fully platform-agnostic**; uses native Kubernetes `PriorityClass` preemption, works identically on EKS, AKS, GKE, or any K8s cluster
+
 ## Key Design Decisions
 
 ### Why label bursty workloads?
